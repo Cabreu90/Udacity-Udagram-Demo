@@ -85,3 +85,94 @@ Resources:
 # <-- <-- Launch Configuration <-- <--
 
   
+# Autoscaling Group. Launch servers in private subnets.
+  WebAppGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+      - Fn::ImportValue: 
+          !Sub "${EnvironmentName}-PRIV-NETS"
+      LaunchConfigurationName:
+        Ref: WebAppLaunchConfig
+      MinSize: '4'
+      MaxSize: '5'
+      TargetGroupARNs:
+      - Ref: WebAppTargetGroup
+# <-- <-- Autoscaling Group <-- <--
+
+# Load Balancer in the public subnets.
+  WebAppLB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Subnets:
+      - Fn::ImportValue: !Sub "${EnvironmentName}-PUB-SN1"
+      - Fn::ImportValue: !Sub "${EnvironmentName}-PUB-SN2"
+      SecurityGroups:
+      - Ref: LBSecGroup
+      
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: WebAppTargetGroup
+      LoadBalancerArn:
+        Ref: WebAppLB
+      Port: "80"
+      Protocol: HTTP
+
+  #Aplication load balancer listener Rule    
+  ALBListenerRule:
+      Type: AWS::ElasticLoadBalancingV2::ListenerRule
+      Properties:
+        Actions:
+        - Type: forward
+          TargetGroupArn: !Ref 'WebAppTargetGroup'
+        Conditions:
+        - Field: path-pattern
+          Values: [/]
+        ListenerArn: !Ref 'Listener'
+        Priority: 1
+
+  WebAppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 8
+      HealthyThresholdCount: 2
+      Port: '80'                  
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId: 
+        Fn::ImportValue:
+          Fn::Sub: "${EnvironmentName}-VPCID"
+# <-- <-- Load Balancer <-- <--
+
+Outputs:
+    WebServerSecGroup:
+          Description: "The WebServerSecGroup"
+          Value:
+            Ref: WebServerSecGroup
+
+    WebAppGrp:
+      Description: "The AutoScalingGroup"
+      Value:
+        Ref: "WebAppGroup"
+      Export:
+            Name: !Sub ${EnvironmentName}-Web-SG
+
+    AppLaunchConf:
+      Description: "The Web App Launch Configguration"
+      Value:
+        Ref: "WebAppLaunchConfig"
+      Export:
+            Name: !Sub ${EnvironmentName}-Web-LC
+
+    LoadBalancerDNSName:
+      Description: The DNSName of the load balancer
+      Value: !Join [ "", [ "http://", !GetAtt WebAppLB.DNSName ]]
+      Export:
+            Name: !Sub ${EnvironmentName}-LB-DNS
