@@ -1,0 +1,14 @@
+[
+	{
+		"ParameterKey": "EnvironmentName",
+		"ParameterValue": "UdacityProject2"
+	},
+	{
+		"ParameterKey": "PersonalIP",
+		"ParameterValue": "10.0.0.0/16" 
+	},
+	{
+		"ParameterKey": "BastionKeyName",
+		"ParameterValue": "jumpbox-key"
+	}
+]
