@@ -2,7 +2,7 @@
 
 ## Deploy a High-Availability Web App Using CloudFormation
 
-In this project, you’ll find the cloudformaation code to deploy web servers for a highly available web app using CloudFormation that i coded as part of this project. Using these files you can create and deploy the infrastructure and application for an Instagram-like app from the ground up. You will begin with deploying the networking components followed by servers, security roles and software and do it exactly as it’s done on the job: following best practices and scripting as much as possible.
+In this project, you’ll find the cloudformation code to deploy web servers for a highly available web app using CloudFormation that i coded as part of this project. Using these files you can create and deploy the infrastructure and application for an Instagram-like app from the ground up. You will begin with deploying the networking components followed by servers, security roles and software and do it exactly as it’s done on the job: following best practices and scripting as much as possible.
 
 
 ## Requirenments
